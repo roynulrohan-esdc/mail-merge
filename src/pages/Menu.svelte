@@ -1,5 +1,6 @@
 <script>
   import { loadData, data, failLoadData, failLoadMessage } from "../stores/data";
+  import { generateEmails, generatingEmails, generationMessage } from "../stores/emails";
   import { changePage, pageLoading } from "../stores/routes";
 
   $pageLoading = true;
@@ -54,19 +55,31 @@
             <button
               class="btn btn-default"
               on:click={() => {
-                // TODO
+                generateEmails(0);
               }}
+              disabled={$generatingEmails}
             >
               Contact Employees
             </button>
             <button
               class="btn btn-default"
               on:click={() => {
-                // TODO
+                generateEmails(1);
               }}
+              disabled={$generatingEmails}
             >
               Contact Managers
             </button>
+          </div>
+
+          <div class="mrgn-tp-lg">
+            {#if $generatingEmails}
+              <p>Generating emails...</p>
+            {/if}
+
+            {#if !$generatingEmails && $generationMessage}
+              <p>{@html $generationMessage}</p>
+            {/if}
           </div>
         </div>
       </div>
