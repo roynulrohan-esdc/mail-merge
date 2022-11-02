@@ -11,21 +11,18 @@
     <div class="mrgn-tp-lg">
       <h1 id="title">Mail Merge</h1>
     </div>
+
+    <svelte:component this={$page} />
+
+    {#if $pageLoading}
+      <Loading />
+    {/if}
   </div>
-
-  <svelte:component this={$page} />
-
-  {#if $pageLoading}
-    <Loading />
-  {/if}
 </main>
 
 <style>
   main {
     width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     height: 100%;
     background-color: rgb(245, 245, 245);
   }

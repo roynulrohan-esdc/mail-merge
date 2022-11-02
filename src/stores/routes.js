@@ -1,14 +1,16 @@
 import { readable, writable } from 'svelte/store';
-import MailSelect from '../pages/MailSelect.svelte'
+import Menu from '../pages/Menu.svelte'
+import ReviewData from '../pages/ReviewData.svelte'
 
 // SPA Application style routing for HTA
 export const routes = {
-    "mail-select": MailSelect
+    "menu": Menu,
+    "review-data": ReviewData
 }
 
-export let currentRoute = "mail-select"
+export let currentRoute = "menu"
 
-export const page = writable(MailSelect)
+export const page = writable(Menu)
 
 export const pageLoading = writable(false)
 

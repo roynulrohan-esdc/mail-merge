@@ -1,18 +1,28 @@
 import { get, readable, writable } from "svelte/store";
 import { path } from "./settings";
 
-export const data = writable({ scenarioOne: [], scenarioTwo: [] });
+export const data = writable();
 export const failLoadData = writable(false);
+export const failLoadMessage = writable('');
 
 const DEFAULT_SHEET = "Sheet1";
 
 export const loadData = () => {
-  readFile(path + "/input/Scenario1.xlsx", 1);
-  readFile(path + "/input/Scenario2.xlsx", 2);
+  try {
+    const scenarioOne = readFile(path + "/input/Scenario1.xlsx", 1);
+    const scenarioTwo = readFile(path + "/input/Scenario2.xlsx", 2);
+
+    data.set({ scenarioOne, scenarioTwo })
+  } catch (e) {
+    console.log(e)
+    failLoadMessage.set(e)
+    failLoadData.set(true)
+  }
 };
 
 const readFile = (filePath, scenario) => {
   let fso = new ActiveXObject("Scripting.FileSystemObject");
+  let array;
 
   if (fso.FileExists(filePath)) {
     let excel = new ActiveXObject("Excel.Application");
@@ -31,22 +41,22 @@ const readFile = (filePath, scenario) => {
       let workbook = excel.workbooks.open(filePath);
       workbook.activate();
 
-      if (scenario == 1) {
-        readScenarioOne(workbook);
-      } else {
-        readScenarioTwo(workbook);
-      }
 
-      failLoadData.set(false);
+      if (scenario == 1) {
+        array = readScenarioOne(workbook);
+      } else {
+        array = readScenarioTwo(workbook);
+      }
     } catch (e) {
       console.error(e);
-      failLoadData.set(true);
+      throw `Error opening ${filePath}`
     }
-
     excel.quit();
   } else {
-    failLoadData.set(true);
+    throw `${filePath} does not exist`
   }
+
+  return array;
 };
 
 export const readScenarioOne = (workbook) => {
@@ -54,6 +64,8 @@ export const readScenarioOne = (workbook) => {
 
   let remainingResults = sheet.UsedRange.SpecialCells(12);
   let areasResults = remainingResults.Areas;
+
+  const array = [];
 
   for (let i = 1; i <= remainingResults.Areas.Count; i++) {
     let currentArea = areasResults(i);
@@ -64,9 +76,13 @@ export const readScenarioOne = (workbook) => {
       const lastName = currentArea.Cells(j, 2).value;
       const email = currentArea.Cells(j, 3).value;
 
-      get(data).scenarioOne.push({ firstName, lastName, email });
+      if (firstName && lastName && email) {
+        array.push({ firstName, lastName, email });
+      }
     }
   }
+
+  return array;
 };
 
 export const readScenarioTwo = (workbook) => {
@@ -74,6 +90,8 @@ export const readScenarioTwo = (workbook) => {
 
   let remainingResults = sheet.UsedRange.SpecialCells(12);
   let areasResults = remainingResults.Areas;
+
+  const array = [];
 
   for (let i = 1; i <= remainingResults.Areas.Count; i++) {
     let currentArea = areasResults(i);
@@ -85,7 +103,11 @@ export const readScenarioTwo = (workbook) => {
       const supervisorName = currentArea.Cells(j, 3).value;
       const supervisorEmail = currentArea.Cells(j, 4).value;
 
-      get(data).scenarioTwo.push({ fullName, email, supervisorName, supervisorEmail });
+      if (fullName && email && supervisorName && supervisorEmail) {
+        array.push({ fullName, email, supervisorName, supervisorEmail });
+      }
     }
   }
+
+  return array;
 };

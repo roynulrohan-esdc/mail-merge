@@ -36,6 +36,10 @@ input {
   min-height: 36px !important;
 }
 
+option:hover {
+  background-color: rgb(138, 138, 138) !important;
+}
+
 label {
   color: grey;
 }
