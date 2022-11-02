@@ -2,7 +2,7 @@
 </script>
 
 <div class="overlay">
-  <p>Loading...</p>
+  <p>Importing data...</p>
 </div>
 
 <style>

@@ -21,57 +21,56 @@
   {:else}
     <h2>Menu</h2>
 
-    <div>
-      <table id="options-table" class="table mrgn-tp-lg">
-        <thead>
-          <tr>
-            <th scope="col" class="col-sm-12">Option</th>
-            <th scope="col" class="col-sm-1" />
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Contact Employees</td>
-            <td>
-              <button
-                class="btn btn-default"
-                on:click={() => {
-                  $changePage("review-data");
-                }}
-              >
-                Select
-              </button>
-            </td>
-          </tr>
-          <tr>
-            <td>Contact Managers</td>
-            <td>
-              <button
-                class="btn btn-default"
-                on:click={() => {
-                  $changePage("review-data");
-                }}
-              >
-                Select
-              </button>
-            </td>
-          </tr>
-          <tr>
-            <td>Review information loaded by excel</td>
-            <td>
-              <button
-                class="btn btn-default"
-                on:click={() => {
-                  $changePage("review-data");
-                }}
-              >
-                Select
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    {#if $data}
+      <div class="content">
+        <div>
+          <p>Data succesfully imported from <code>Scenario1.xlsx</code> & <code>Scenario2.xlsx</code>.</p>
+        </div>
+
+        <div class="mrgn-tp-lg">
+          <h4>
+            <!-- svelte-ignore a11y-invalid-attribute -->
+            1. Review Data before proceeding
+          </h4>
+
+          <div class="mrgn-tp-md">
+            <button
+              class="btn btn-default"
+              on:click={() => {
+                $changePage("review-data");
+              }}
+            >
+              Review
+            </button>
+          </div>
+        </div>
+
+        <div class="mrgn-tp-lg">
+          <h4>
+            <!-- svelte-ignore a11y-invalid-attribute -->
+            2. Generate Emails
+          </h4>
+          <div class="flex mrgn-tp-md">
+            <button
+              class="btn btn-default"
+              on:click={() => {
+                // TODO
+              }}
+            >
+              Contact Employees
+            </button>
+            <button
+              class="btn btn-default"
+              on:click={() => {
+                // TODO
+              }}
+            >
+              Contact Managers
+            </button>
+          </div>
+        </div>
+      </div>
+    {/if}
   {/if}
 </div>
 
@@ -80,5 +79,17 @@
     color: grey;
     width: 100%;
     text-align: center;
+  }
+
+  .content {
+    margin-top: 50px;
+  }
+
+  .flex {
+    display: flex;
+  }
+
+  .flex > * {
+    margin-right: 20px;
   }
 </style>

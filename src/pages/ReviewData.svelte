@@ -22,7 +22,7 @@
     <div>
       <label for="fileDropdown">Choose a file to review</label>
       <select id="fileDropdown" bind:value={selected}>
-        <option label="Select a file to review" />
+        <option label="File Select" />
         <option value={"Scenario1.xlsx"}>Scenario1.xlsx</option>
         <option value={"Scenario2.xlsx"}>Scenario2.xlsx</option>
       </select>
