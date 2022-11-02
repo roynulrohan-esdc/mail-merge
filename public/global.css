@@ -1,0 +1,57 @@
+:root {
+  font-family: "Arial", sans-serif;
+}
+
+body {
+  margin: 0;
+  height: 100vh;
+}
+
+.footer-button {
+  cursor: pointer;
+  font-size: 22px;
+  color: white;
+  padding: 12px 20px 12px 20px;
+  border: none;
+  white-space: nowrap;
+  background-color: rgba(38, 55, 74, 1);
+  border-radius: 4px;
+  height: 50px;
+}
+
+.footer-button:disabled {
+  cursor: default;
+  background-color: rgba(38, 55, 74, 0.6);
+}
+
+select,
+input {
+  box-sizing: border-box !important;
+  display: flex !important;
+  width: 100% !important;
+  border: 1px solid rgb(189, 189, 189) !important;
+  font-size: 1.8rem !important;
+  padding: 4px 4px 4px 12px !important;
+  align-items: center !important;
+  min-height: 36px !important;
+}
+
+label {
+  color: grey;
+}
+
+input[type="checkbox"] {
+  height: 40px !important;
+  width: 40px !important;
+  border-width: 2px;
+  border-color: grey !important;
+  box-shadow: none;
+}
+
+.pd-l-0 {
+  padding-left: 0;
+}
+
+.pd-r-0 {
+  padding-right: 0;
+}
