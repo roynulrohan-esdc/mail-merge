@@ -1,15 +1,22 @@
 <script>
-  import { loadData, data, failLoadData, failLoadMessage } from "../stores/data";
+  import { get } from "svelte/store";
+  import { loadData, data, failLoadData, failLoadMessage, openFile } from "../stores/data";
   import { generateEmails, generatingEmails, generationMessage } from "../stores/emails";
   import { changePage, pageLoading } from "../stores/routes";
 
-  $pageLoading = true;
+  const getData = () => {
+    $pageLoading = true;
 
-  setTimeout(() => {
-    if (!$data) loadData();
+    setTimeout(() => {
+      loadData().then(() => {
+        $pageLoading = false;
+      });
+    }, 200);
+  };
 
-    $pageLoading = false;
-  }, 200);
+  if (!$data) {
+    getData();
+  }
 </script>
 
 <div>
@@ -31,25 +38,61 @@
         <div class="mrgn-tp-lg">
           <h4>
             <!-- svelte-ignore a11y-invalid-attribute -->
-            1. Review Data before proceeding
+            Change Data
           </h4>
 
           <div class="mrgn-tp-md">
-            <button
-              class="btn btn-default"
-              on:click={() => {
-                $changePage("review-data");
-              }}
-            >
-              Review
-            </button>
+            <div class="flex mrgn-tp-md">
+              <button
+                class="btn btn-default"
+                on:click={() => {
+                  openFile(1);
+                }}
+                disabled={$generatingEmails}
+              >
+                Open Scenario1.xlsx
+              </button>
+              <button
+                class="btn btn-default"
+                on:click={() => {
+                  openFile(2);
+                }}
+                disabled={$generatingEmails}
+              >
+                Open Scenario2.xlsx
+              </button>
+            </div>
+          </div>
+
+          <div class="mrgn-tp-md">
+            <p>If data has been changed, sync to update data</p>
+            <div class="flex mrgn-tp-md">
+              <button
+                class="btn btn-default"
+                on:click={() => {
+                  getData();
+                }}
+                disabled={$generatingEmails}
+              >
+                Sync Data
+              </button>
+              <button
+                class="btn btn-default"
+                on:click={() => {
+                  $changePage("review-data");
+                }}
+                disabled={$generatingEmails}
+              >
+                View Imported Data
+              </button>
+            </div>
           </div>
         </div>
 
         <div class="mrgn-tp-lg">
           <h4>
             <!-- svelte-ignore a11y-invalid-attribute -->
-            2. Generate Emails
+            Generate Emails
           </h4>
           <div class="flex mrgn-tp-md">
             <button
@@ -78,7 +121,7 @@
             {/if}
 
             {#if !$generatingEmails && $generationMessage}
-              <p>{@html $generationMessage}</p>
+              <p>{$generationMessage.message} <code>{$generationMessage.path}</code></p>
             {/if}
           </div>
         </div>

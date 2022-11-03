@@ -21,6 +21,9 @@ export const generateEmails = (mode = 0) => {
         if (mode === 0) {
             if (!fso.FolderExists(outputPath + "/employees")) {
                 fso.CreateFolder(outputPath + "/employees");
+            } else {
+                fso.DeleteFolder(outputPath + "/employees");
+                fso.CreateFolder(outputPath + "/employees");
             }
 
             const employees = [...get(data).scenarioOne];
@@ -47,9 +50,12 @@ export const generateEmails = (mode = 0) => {
             })
 
             generatingEmails.set(false)
-            generationMessage.set(`Employee emails succesfully generated at <code>/output/employees/</code>`)
+            generationMessage.set({ message: 'Employee emails succesfully generated at ', path: '/output/employees/' })
         } else {
             if (!fso.FolderExists(outputPath + "/managers")) {
+                fso.CreateFolder(outputPath + "/managers");
+            } else {
+                fso.DeleteFolder(outputPath + "/managers");
                 fso.CreateFolder(outputPath + "/managers");
             }
 
@@ -93,7 +99,7 @@ export const generateEmails = (mode = 0) => {
             })
 
             generatingEmails.set(false)
-            generationMessage.set(`Manager emails succesfully generated at <code>/output/managers/</code>`)
+            generationMessage.set({ message: 'Manager emails succesfully generated at ', path: '/output/managers/' })
         }
     }, 200);
 }
@@ -102,7 +108,7 @@ export const generateEmails = (mode = 0) => {
 const scenarioOneEmailBody = (firstName, lastName) => {
     let body = `
 
-    <p style="font-size:12pt; font-family:Arial;">
+    <p style="${styles.email}">
         Hello ${firstName} ${lastName},                                                         <br/>
 
                                                                                                 <br/>
@@ -116,19 +122,23 @@ const scenarioOneEmailBody = (firstName, lastName) => {
 
 const scenarioTwoEmailBody = (fullName, employees) => {
     const formattedEmployees = employees.map((employee) => {
-        return `<li style="font-size:12pt; font-family:Arial;">${employee}</li>`
+        return `<li style="${styles.email}">${employee}</li>`
     })
     let body = `
 
-    <p style="font-size:12pt; font-family:Arial;">
+    <p style="${styles.email}">
         Hello ${fullName},                                                                      <br/>
 
                                                                                                 <br/>
 
-        This is a test email regarding the following employees:                                <br/>
+        This is a test email regarding the following employees:                                 <br/>
         <ul>${formattedEmployees.join("\n")}</ul>                                               <br/>
     </p>`
 
 
     return body
+}
+
+const styles = {
+    email: `font-size:12pt; font-family:Arial;`
 }

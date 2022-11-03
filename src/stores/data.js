@@ -1,5 +1,7 @@
 import { get, readable, writable } from "svelte/store";
 import { path } from "./settings";
+import { pageLoading } from './routes'
+
 
 export const data = writable();
 export const failLoadData = writable(false);
@@ -7,11 +9,12 @@ export const failLoadMessage = writable('');
 
 const DEFAULT_SHEET = "Sheet1";
 
-export const loadData = () => {
+export const loadData = async () => {
   try {
     const scenarioOne = readFile(path + "/input/Scenario1.xlsx", 1);
     const scenarioTwo = readFile(path + "/input/Scenario2.xlsx", 2);
 
+    console.log(scenarioOne)
     data.set({ scenarioOne, scenarioTwo })
   } catch (e) {
     console.log(e)
@@ -19,6 +22,52 @@ export const loadData = () => {
     failLoadData.set(true)
   }
 };
+
+export const openFile = (scenario) => {
+  try {
+    scenario == 1 ? readFileWithVisibility(path + "/input/Scenario1.xlsx", 1) : readFileWithVisibility(path + "/input/Scenario2.xlsx", 2)
+    pageLoading.set(false)
+  } catch (e) {
+    console.log(e)
+  }
+}
+
+let workbook;
+
+const readFileWithVisibility = (filePath, scenario) => {
+  let fso = new ActiveXObject("Scripting.FileSystemObject");
+
+  if (fso.FileExists(filePath)) {
+    const DEFAULT_DPI = 96;
+
+    let excel = new ActiveXObject("Excel.Application");
+    excel.Visible = true
+    excel.Left = (screen.availWidth / (screen.systemXDPI / DEFAULT_DPI * 2)) * 0.75
+    excel.Top = 0
+    excel.Width = (screen.availWidth / (screen.systemXDPI / DEFAULT_DPI * 2)) * 0.75
+    excel.Height = (screen.availHeight / (screen.systemXDPI / DEFAULT_DPI)) * 0.75
+    excel.DisplayAlerts = false
+
+    window.addEventListener(
+      "beforeunload",
+      function (e) {
+        excel.DisplayAlerts = false;
+        excel.quit();
+      },
+      false
+    );
+
+    try {
+      workbook = excel.workbooks.open(filePath);
+      workbook.activate();
+    } catch (e) {
+      console.error(e);
+      throw `Error opening ${filePath}`
+    }
+  } else {
+    throw `${filePath} does not exist`
+  }
+}
 
 const readFile = (filePath, scenario) => {
   let fso = new ActiveXObject("Scripting.FileSystemObject");
