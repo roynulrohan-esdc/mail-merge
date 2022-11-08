@@ -9,13 +9,17 @@ export const failLoadMessage = writable('');
 
 const DEFAULT_SHEET = "Sheet1";
 
+export const FILE_PATH = "\\input\\Data.xlsx"
+
+export const getFileName = () => {
+  const split = FILE_PATH.split('\\');
+
+  return split[split.length - 1]
+}
+
 export const loadData = async () => {
   try {
-    const scenarioOne = readFile(path + "/input/Scenario1.xlsx", 1);
-    const scenarioTwo = readFile(path + "/input/Scenario2.xlsx", 2);
-
-    console.log(scenarioOne)
-    data.set({ scenarioOne, scenarioTwo })
+    data.set(readFile(path + FILE_PATH))
   } catch (e) {
     console.log(e)
     failLoadMessage.set(e)
@@ -23,9 +27,9 @@ export const loadData = async () => {
   }
 };
 
-export const openFile = (scenario) => {
+export const openFile = () => {
   try {
-    scenario == 1 ? readFileWithVisibility(path + "/input/Scenario1.xlsx", 1) : readFileWithVisibility(path + "/input/Scenario2.xlsx", 2)
+    readFileWithVisibility(path + FILE_PATH)
     pageLoading.set(false)
   } catch (e) {
     console.log(e)
@@ -34,7 +38,7 @@ export const openFile = (scenario) => {
 
 let workbook;
 
-const readFileWithVisibility = (filePath, scenario) => {
+const readFileWithVisibility = (filePath) => {
   let fso = new ActiveXObject("Scripting.FileSystemObject");
 
   if (fso.FileExists(filePath)) {
@@ -69,7 +73,7 @@ const readFileWithVisibility = (filePath, scenario) => {
   }
 }
 
-const readFile = (filePath, scenario) => {
+const readFile = (filePath) => {
   let fso = new ActiveXObject("Scripting.FileSystemObject");
   let array;
 
@@ -90,12 +94,8 @@ const readFile = (filePath, scenario) => {
       let workbook = excel.workbooks.open(filePath);
       workbook.activate();
 
+      array = readData(workbook);
 
-      if (scenario == 1) {
-        array = readScenarioOne(workbook);
-      } else {
-        array = readScenarioTwo(workbook);
-      }
     } catch (e) {
       console.error(e);
       throw `Error opening ${filePath}`
@@ -108,33 +108,7 @@ const readFile = (filePath, scenario) => {
   return array;
 };
 
-export const readScenarioOne = (workbook) => {
-  const sheet = workbook.Worksheets(DEFAULT_SHEET);
-
-  let remainingResults = sheet.UsedRange.SpecialCells(12);
-  let areasResults = remainingResults.Areas;
-
-  const array = [];
-
-  for (let i = 1; i <= remainingResults.Areas.Count; i++) {
-    let currentArea = areasResults(i);
-    let areaRows = currentArea.Rows.Count;
-
-    for (let j = 2; j <= areaRows; j++) {
-      const firstName = currentArea.Cells(j, 1).value;
-      const lastName = currentArea.Cells(j, 2).value;
-      const email = currentArea.Cells(j, 3).value;
-
-      if (firstName && lastName && email) {
-        array.push({ firstName, lastName, email });
-      }
-    }
-  }
-
-  return array;
-};
-
-export const readScenarioTwo = (workbook) => {
+export const readData = (workbook) => {
   const sheet = workbook.Worksheets(DEFAULT_SHEET);
 
   let remainingResults = sheet.UsedRange.SpecialCells(12);

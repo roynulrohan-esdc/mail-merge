@@ -26,7 +26,7 @@ export const generateEmails = (mode = 0) => {
                 fso.CreateFolder(outputPath + "/employees");
             }
 
-            const employees = [...get(data).scenarioOne];
+            const employees = [...get(data)];
 
             employees.forEach((employee) => {
                 try {
@@ -38,9 +38,9 @@ export const generateEmails = (mode = 0) => {
 
                     objEmail.Subject = "Test Subject"
 
-                    objEmail.HTMLBody = scenarioOneEmailBody(employee.firstName, employee.lastName);
+                    objEmail.HTMLBody = employeeEmailBody(employee.fullName);
 
-                    objEmail.SaveAs(`${outputPath}/employees/${employee.lastName}, ${employee.firstName} - Test Subject.msg`)
+                    objEmail.SaveAs(`${outputPath}/employees/${employee.fullName.split(" ")[1]}, ${employee.fullName.split(" ")[0]} - Test Subject.msg`)
                 }
 
                 catch (e) {
@@ -59,7 +59,7 @@ export const generateEmails = (mode = 0) => {
                 fso.CreateFolder(outputPath + "/managers");
             }
 
-            const employees = [...get(data).scenarioTwo];
+            const employees = [...get(data)];
             const managerToEmployees = {};
             const managerToEmail = {};
 
@@ -87,7 +87,7 @@ export const generateEmails = (mode = 0) => {
 
                     objEmail.Subject = "Test Subject"
 
-                    objEmail.HTMLBody = scenarioTwoEmailBody(manager[0], manager[1]);
+                    objEmail.HTMLBody = managerEmailBody(manager[0], manager[1]);
 
                     objEmail.SaveAs(`${outputPath}/managers/${manager[0].split(" ")[1]}, ${manager[0].split(" ")[0]} - Test Subject.msg`)
                 }
@@ -101,15 +101,15 @@ export const generateEmails = (mode = 0) => {
             generatingEmails.set(false)
             generationMessage.set({ message: 'Manager emails succesfully generated at ', path: '/output/managers/' })
         }
-    }, 200);
+    }, 1000);
 }
 
 
-const scenarioOneEmailBody = (firstName, lastName) => {
+const employeeEmailBody = (fullName) => {
     let body = `
 
     <p style="${styles.email}">
-        Hello ${firstName} ${lastName},                                                         <br/>
+        Hello ${fullName},                                                                      <br/>
 
                                                                                                 <br/>
 
@@ -120,7 +120,7 @@ const scenarioOneEmailBody = (firstName, lastName) => {
     return body
 }
 
-const scenarioTwoEmailBody = (fullName, employees) => {
+const managerEmailBody = (fullName, employees) => {
     const formattedEmployees = employees.map((employee) => {
         return `<li style="${styles.email}">${employee}</li>`
     })

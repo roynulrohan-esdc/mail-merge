@@ -1,6 +1,6 @@
 <script>
-  import { loadData, data, failLoadData, failLoadMessage } from "../stores/data";
-  import { changePage, pageLoading } from "../stores/routes";
+  import { data } from "../stores/data";
+  import { changePage } from "../stores/routes";
 
   let selected = "";
 </script>
@@ -19,71 +19,44 @@
   <h2>Review Excel Data</h2>
 
   <div class="content">
-    <div>
+    <!-- <div>
       <label for="fileDropdown">Choose a file to review</label>
       <select id="fileDropdown" bind:value={selected}>
         <option label="File Select" />
         <option value={"Scenario1.xlsx"}>Scenario1.xlsx</option>
         <option value={"Scenario2.xlsx"}>Scenario2.xlsx</option>
       </select>
-    </div>
+    </div> -->
     {#if $data}
       <div class="mrgn-tp-lg">
-        {#if selected === "Scenario1.xlsx"}
-          <table class="table results-table table-bordered table-striped">
-            <thead>
+        <table class="table results-table table-bordered">
+          <thead>
+            <tr>
+              <th scope="col">Full Name</th>
+              <th scope="col">Email</th>
+              <th scope="col">Supervisor's Name</th>
+              <th scope="col">Manager Email</th>
+            </tr>
+          </thead>
+          <tbody>
+            {#each $data as row}
               <tr>
-                <th scope="col">First Name</th>
-                <th scope="col">Last Name</th>
-                <th scope="col">Email</th>
+                <td>
+                  {row.fullName}
+                </td>
+                <td>
+                  {row.email}
+                </td>
+                <td>
+                  {row.supervisorName}
+                </td>
+                <td>
+                  {row.supervisorEmail}
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {#each $data.scenarioOne as row}
-                <tr>
-                  <td>
-                    {row.firstName}
-                  </td>
-                  <td>
-                    {row.lastName}
-                  </td>
-                  <td>
-                    {row.email}
-                  </td>
-                </tr>
-              {/each}
-            </tbody>
-          </table>
-        {:else if selected === "Scenario2.xlsx"}
-          <table class="table results-table table-bordered table-striped">
-            <thead>
-              <tr>
-                <th scope="col">Full Name</th>
-                <th scope="col">Email</th>
-                <th scope="col">Supervisor's Name</th>
-                <th scope="col">Manager Email</th>
-              </tr>
-            </thead>
-            <tbody>
-              {#each $data.scenarioTwo as row}
-                <tr>
-                  <td>
-                    {row.fullName}
-                  </td>
-                  <td>
-                    {row.email}
-                  </td>
-                  <td>
-                    {row.supervisorName}
-                  </td>
-                  <td>
-                    {row.supervisorEmail}
-                  </td>
-                </tr>
-              {/each}
-            </tbody>
-          </table>
-        {/if}
+            {/each}
+          </tbody>
+        </table>
       </div>
     {/if}
   </div>
