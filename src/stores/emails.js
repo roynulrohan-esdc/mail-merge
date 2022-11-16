@@ -1,13 +1,14 @@
 import { get, writable } from "svelte/store"
 import { path } from "./settings";
 import { data } from './data'
+import { templatesDirectory } from './templates'
 
 export const generatingEmails = writable(false);
 export const generationMessage = writable("");
 
 const outputPath = path + '/output/';
 
-export const generateEmails = (mode = 0) => {
+export const generateEmails = (mode = 0, templateName) => {
     let fso = new ActiveXObject("Scripting.FileSystemObject");
 
     if (!fso.FolderExists(outputPath)) {
@@ -36,11 +37,13 @@ export const generateEmails = (mode = 0) => {
 
                     objEmail.To = employee.email;
 
-                    objEmail.Subject = "Test Subject"
+                    const email = getEmployeeEmail(templateName, employee);
 
-                    objEmail.HTMLBody = employeeEmailBody(employee.fullName);
+                    objEmail.Subject = email.subject
 
-                    objEmail.SaveAs(`${outputPath}/employees/${employee.fullName.split(" ")[1]}, ${employee.fullName.split(" ")[0]} - Test Subject.msg`)
+                    objEmail.HTMLBody = email.body;
+
+                    objEmail.SaveAs(`${outputPath}/employees/${employee.fullName.split(" ")[1]}, ${employee.fullName.split(" ")[0]} - ${email.subject}.msg`)
                 }
 
                 catch (e) {
@@ -85,11 +88,13 @@ export const generateEmails = (mode = 0) => {
 
                     objEmail.To = managerToEmail[manager[0]];
 
-                    objEmail.Subject = "Test Subject"
+                    const email = getManagerEmail(templateName, { supervisorName: manager[0], employees: manager[1] });
 
-                    objEmail.HTMLBody = managerEmailBody(manager[0], manager[1]);
+                    objEmail.Subject = email.subject
 
-                    objEmail.SaveAs(`${outputPath}/managers/${manager[0].split(" ")[1]}, ${manager[0].split(" ")[0]} - Test Subject.msg`)
+                    objEmail.HTMLBody = email.body
+
+                    objEmail.SaveAs(`${outputPath}/managers/${manager[0].split(" ")[1]}, ${manager[0].split(" ")[0]} - ${email.subject}.msg`)
                 }
 
                 catch (e) {
@@ -105,38 +110,44 @@ export const generateEmails = (mode = 0) => {
 }
 
 
-const employeeEmailBody = (fullName) => {
-    let body = `
+const getEmployeeEmail = (templateName, { fullName }) => {
+    let outlook = new ActiveXObject("Outlook.Application");
 
-    <p style="${styles.email}">
-        Hello ${fullName},                                                                      <br/>
+    let mailItem = outlook.createItemFromTemplate(templatesDirectory + "\\employee\\" + templateName)
 
-                                                                                                <br/>
+    const keys = {
+        fullName,
+    }
 
-        This is a test email.                                                                   <br/>
-    </p>`
+    let body = mailItem.HTMLBody;
 
+    Object.keys(keys).forEach(key => {
+        body = body.replaceAll(`{${key}}`, keys[key])
+    })
 
-    return body
+    return { body, subject: mailItem.Subject }
 }
 
-const managerEmailBody = (fullName, employees) => {
+const getManagerEmail = (templateName, { supervisorName, employees }) => {
     const formattedEmployees = employees.map((employee) => {
         return `<li style="${styles.email}">${employee}</li>`
     })
-    let body = `
 
-    <p style="${styles.email}">
-        Hello ${fullName},                                                                      <br/>
+    let outlook = new ActiveXObject("Outlook.Application");
 
-                                                                                                <br/>
+    let mailItem = outlook.createItemFromTemplate(templatesDirectory + "\\manager\\" + templateName)
 
-        This is a test email regarding the following employees:                                 <br/>
-        <ul>${formattedEmployees.join("\n")}</ul>                                               <br/>
-    </p>`
+    const keys = {
+        supervisorName, employees: formattedEmployees.join("")
+    }
 
+    let body = mailItem.HTMLBody;
 
-    return body
+    Object.keys(keys).forEach(key => {
+        body = body.replaceAll(`{${key}}`, keys[key])
+    })
+
+    return { body, subject: mailItem.Subject }
 }
 
 const styles = {

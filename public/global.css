@@ -34,6 +34,16 @@ input {
   padding: 4px 4px 4px 12px !important;
   align-items: center !important;
   min-height: 36px !important;
+} 
+
+select::-ms-value {
+  background: none; /* remove blue background on ie10/ie11 when selected*/
+  color: #000;
+}
+
+select > option:checked{
+  background: none;/* remove blue background on ie10/ie11 when selected*/
+  color: #000;
 }
 
 option:hover {
