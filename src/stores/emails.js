@@ -3,10 +3,46 @@ import { path } from "./settings";
 import { data } from './data'
 import { templatesDirectory } from './templates'
 
+export const employeeEmails = writable([])
+export const managerEmails = writable([])
+
+export const sendingEmails = writable(false);
+export const sendingMessage = writable("");
+
 export const generatingEmails = writable(false);
 export const generationMessage = writable("");
 
 const outputPath = path + '/output/';
+
+export const sendEmails = (mode = 0) => {
+    sendingEmails.set(true);
+    sendingMessage.set("");
+
+    setTimeout(() => {
+        if (mode === 0) {
+            try {
+                get(employeeEmails).forEach((email) => {
+                    email.Send()
+                })
+            } catch (e) {
+                console.error(e)
+                sendingMessage.set({ message: "An unknown error occured while sending emails" })
+            }
+        } else {
+            try {
+                get(managerEmails).forEach((email) => {
+                    email.Send()
+                })
+            } catch (e) {
+                console.error(e)
+                sendingMessage.set({ message: "An unknown error occured while sending emails" })
+            }
+        }
+
+        sendingMessage.set({ message: "Emails successfully sent" })
+        sendingEmails.set(false);
+    }, 1000);
+}
 
 export const generateEmails = (mode = 0, templateName) => {
     let fso = new ActiveXObject("Scripting.FileSystemObject");
@@ -29,6 +65,8 @@ export const generateEmails = (mode = 0, templateName) => {
 
             const employees = [...get(data)];
 
+            const emails = []
+
             employees.forEach((employee) => {
                 try {
                     let objOutlook = new ActiveXObject("Outlook.Application")
@@ -44,15 +82,18 @@ export const generateEmails = (mode = 0, templateName) => {
                     objEmail.HTMLBody = email.body;
 
                     objEmail.SaveAs(`${outputPath}/employees/${employee.fullName.split(" ")[1]}, ${employee.fullName.split(" ")[0]} - ${email.subject}.msg`)
+
+                    emails.push(objEmail)
                 }
 
                 catch (e) {
                     console.error(e)
-                    generationMessage.set("An unknown error occured while generating emails")
+                    generationMessage.set({ message: "An unknown error occured while generating emails" })
                 }
             })
 
-            generatingEmails.set(false)
+            employeeEmails.set(emails)
+
             generationMessage.set({ message: 'Employee emails succesfully generated at ', path: '/output/employees/' })
         } else {
             if (!fso.FolderExists(outputPath + "/managers")) {
@@ -80,6 +121,8 @@ export const generateEmails = (mode = 0, templateName) => {
 
             const managers = Object.entries(managerToEmployees);
 
+            const emails = []
+
             managers.forEach((manager) => {
                 try {
                     let objOutlook = new ActiveXObject("Outlook.Application")
@@ -95,17 +138,22 @@ export const generateEmails = (mode = 0, templateName) => {
                     objEmail.HTMLBody = email.body
 
                     objEmail.SaveAs(`${outputPath}/managers/${manager[0].split(" ")[1]}, ${manager[0].split(" ")[0]} - ${email.subject}.msg`)
+
+                    emails.push(objEmail)
                 }
 
                 catch (e) {
                     console.error(e)
-                    generationMessage.set("An unknown error occured while generating emails")
+                    generationMessage.set({ message: "An unknown error occured while generating emails" })
                 }
             })
 
-            generatingEmails.set(false)
+            managerEmails.set(emails)
+
             generationMessage.set({ message: 'Manager emails succesfully generated at ', path: '/output/managers/' })
         }
+
+        generatingEmails.set(false)
     }, 1000);
 }
 

@@ -1,6 +1,6 @@
 <script>
   import { loadData, data, failLoadData, failLoadMessage, openFile, FILE_PATH, getFileName } from "../stores/data";
-  import { generateEmails, generatingEmails, generationMessage } from "../stores/emails";
+  import { employeeEmails, generateEmails, generatingEmails, generationMessage, managerEmails, sendEmails, sendingEmails, sendingMessage } from "../stores/emails";
   import { changePage, pageLoading } from "../stores/routes";
   import { loadTemplates, templatesError, templatesList } from "../stores/templates";
 
@@ -18,10 +18,10 @@
     getData();
   }
 
-  let chosenTemplate, chosenType;
+  let chosenTemplate, generationType, sendType;
 
   $: {
-    if (chosenType) {
+    if (generationType) {
       chosenTemplate = "";
     }
   }
@@ -95,7 +95,7 @@
 
           <div class="mrgn-tp-lg">
             <label for="typeDropdown">Employee or Manager</label>
-            <select id="typeDropdown" class="form-control" bind:value={chosenType}>
+            <select id="typeDropdown" class="form-control" bind:value={generationType}>
               <option label="Select a target" />
               <option value={"Employee"}>Employee</option>
               <option value={"Manager"}>Manager</option>
@@ -104,13 +104,13 @@
 
           <div class="mrgn-tp-md">
             <label for="templatesDropdown">Choose a template for script</label>
-            <select id="templatesDropdown" class="form-control" bind:value={chosenTemplate} disabled={chosenType === ""}>
+            <select id="templatesDropdown" class="form-control" bind:value={chosenTemplate} disabled={generationType === ""}>
               <option label="Select a template" />
-              {#if chosenType === "Employee"}
+              {#if generationType === "Employee"}
                 {#each $templatesList.employees as template}
                   <option value={template}>{template}</option>
                 {/each}
-              {:else if chosenType === "Manager"}
+              {:else if generationType === "Manager"}
                 {#each $templatesList.managers as template}
                   <option value={template}>{template}</option>
                 {/each}
@@ -118,12 +118,12 @@
             </select>
           </div>
 
-          {#if chosenTemplate && chosenType}
+          {#if chosenTemplate && generationType}
             <div class="flex mrgn-tp-lg">
               <button
                 class="btn btn-primary"
                 on:click={() => {
-                  generateEmails(chosenType === "Employee" ? 0 : 1, chosenTemplate);
+                  generateEmails(generationType === "Employee" ? 0 : 1, chosenTemplate);
                 }}
                 disabled={$generatingEmails}
               >
@@ -138,10 +138,63 @@
             {/if}
 
             {#if !$generatingEmails && $generationMessage}
-              <p>{$generationMessage.message} <code>{$generationMessage.path}</code></p>
+              <p>
+                {$generationMessage.message}
+                {#if $generationMessage.path}
+                  <code>{$generationMessage.path}</code>
+                {/if}
+              </p>
             {/if}
           </div>
         </div>
+
+        {#if $managerEmails.length !== 0 || $employeeEmails.length !== 0}
+          <div class="mrgn-tp-lg">
+            <h4>Send Emails</h4>
+
+            <div class="mrgn-tp-lg">
+              <label for="typeDropdown">Employee or Manager</label>
+              <select id="typeDropdown" class="form-control" bind:value={sendType}>
+                <option label="Select a target" />
+                {#if $employeeEmails.length !== 0}
+                  <option value={"Employee"}>Employee</option>
+                {/if}
+                {#if $managerEmails.length !== 0}
+                  <option value={"Manager"}>Manager</option>
+                {/if}
+              </select>
+            </div>
+
+            {#if sendType}
+              <div class="flex mrgn-tp-lg">
+                <button
+                  class="btn btn-primary"
+                  on:click={() => {
+                    sendEmails(sendType === "Employee" ? 0 : 1);
+                  }}
+                  disabled={$generatingEmails}
+                >
+                  Send Emails
+                </button>
+              </div>
+            {/if}
+
+            <div class="mrgn-tp-lg">
+              {#if $sendingEmails}
+                <p>Sending emails...</p>
+              {/if}
+
+              {#if !$sendingEmails && $sendingMessage}
+                <p>
+                  {$sendingMessage.message}
+                  {#if $sendingMessage.path}
+                    <code>{$sendingMessage.path}</code>
+                  {/if}
+                </p>
+              {/if}
+            </div>
+          </div>
+        {/if}
       </div>
     {/if}
   {/if}
