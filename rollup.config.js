@@ -5,6 +5,7 @@ import livereload from 'rollup-plugin-livereload';
 import { terser } from 'rollup-plugin-terser';
 import css from 'rollup-plugin-css-only';
 import { babel } from '@rollup/plugin-babel'
+import json from '@rollup/plugin-json';
 
 const production = !process.env.ROLLUP_WATCH;
 // enable for IE11 Support
@@ -88,7 +89,9 @@ export default {
             browser: true,
             dedupe: ['svelte']
         }),
-
+        json({
+            compact: true
+        }),
 
         // In dev mode, call `npm run start` once
         // the bundle has been generated

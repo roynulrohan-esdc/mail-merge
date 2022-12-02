@@ -3,7 +3,7 @@
   import { page, pageLoading } from "./stores/routes";
 
   window.resizeTo(screen.availWidth / 2, screen.availHeight);
-  window.moveTo(-7, 0);
+  window.moveTo(-1920, 0);
 </script>
 
 <main>

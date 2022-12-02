@@ -2,6 +2,7 @@ import { get, writable } from "svelte/store"
 import { path } from "./settings";
 import { data } from './data'
 import { templatesDirectory } from './templates'
+import configJson from '../../public/input/mailConfig.json';
 
 export const employeeEmails = writable([])
 export const managerEmails = writable([])
@@ -12,7 +13,18 @@ export const sendingMessage = writable("");
 export const generatingEmails = writable(false);
 export const generationMessage = writable("");
 
+export const configError = writable();
+export const config = writable({ mailbox: null })
+
 const outputPath = path + '/output/';
+
+export const loadMailConfig = () => {
+    if (!configJson.mailbox) {
+        configError.set('Attribute "mailbox" not found in \\input\\mailConfig.json')
+    }
+
+    config.set({ mailbox: configJson.mailbox })
+}
 
 export const sendEmails = (mode = 0) => {
     sendingEmails.set(true);
@@ -39,7 +51,7 @@ export const sendEmails = (mode = 0) => {
             }
         }
 
-        sendingMessage.set({ message: "Emails successfully sent" })
+        sendingMessage.set({ message: "Emails successfully forwarded to outlook" })
         sendingEmails.set(false);
     }, 1000);
 }
@@ -75,13 +87,15 @@ export const generateEmails = (mode = 0, templateName) => {
 
                     objEmail.To = employee.email;
 
+                    objEmail.SentOnBehalfOfName = get(config).mailbox
+
                     const email = getEmployeeEmail(templateName, employee);
 
                     objEmail.Subject = email.subject
 
                     objEmail.HTMLBody = email.body;
 
-                    objEmail.SaveAs(`${outputPath}/employees/${employee.fullName.split(" ")[1]}, ${employee.fullName.split(" ")[0]} - ${email.subject}.msg`)
+                    objEmail.SaveAs(`${outputPath}/employees/${employee.lastName}, ${employee.firstName}.msg`)
 
                     emails.push(objEmail)
                 }
@@ -108,15 +122,24 @@ export const generateEmails = (mode = 0, templateName) => {
             const managerToEmail = {};
 
             employees.forEach((employee) => {
-                if (!managerToEmployees[employee.supervisorName]) {
-                    managerToEmployees[employee.supervisorName] = [];
-                }
+                const managers = employee.managers.split(',');
+                const managersEmails = employee.managersEmails.split(',')
 
-                managerToEmployees[employee.supervisorName].push(employee.fullName);
+                managers.forEach((manager, i) => {
+                    manager = manager.trim();
 
-                if (!managerToEmail[employee.supervisorName]) {
-                    managerToEmail[employee.supervisorName] = employee.supervisorEmail;
-                }
+                    if (!managerToEmployees[manager]) {
+                        managerToEmployees[manager] = [];
+                    }
+
+                    managerToEmployees[manager].push(`${employee.firstName} ${employee.lastName}`);
+
+                    if (!managerToEmail[manager]) {
+                        managerToEmail[manager] = managersEmails[i].trim();
+                    }
+                })
+
+
             })
 
             const managers = Object.entries(managerToEmployees);
@@ -130,14 +153,16 @@ export const generateEmails = (mode = 0, templateName) => {
                     let objEmail = objOutlook.CreateItem(0) //0 is email
 
                     objEmail.To = managerToEmail[manager[0]];
+                    
+                    objEmail.SentOnBehalfOfName = get(config).mailbox
 
-                    const email = getManagerEmail(templateName, { supervisorName: manager[0], employees: manager[1] });
+                    const email = getManagerEmail(templateName, { managerName: manager[0], impactedEmployees: manager[1] });
 
                     objEmail.Subject = email.subject
 
                     objEmail.HTMLBody = email.body
 
-                    objEmail.SaveAs(`${outputPath}/managers/${manager[0].split(" ")[1]}, ${manager[0].split(" ")[0]} - ${email.subject}.msg`)
+                    objEmail.SaveAs(`${outputPath}/managers/${manager[0].split(" ")[1]}, ${manager[0].split(" ")[0]}.msg`)
 
                     emails.push(objEmail)
                 }
@@ -158,13 +183,13 @@ export const generateEmails = (mode = 0, templateName) => {
 }
 
 
-const getEmployeeEmail = (templateName, { fullName }) => {
+const getEmployeeEmail = (templateName, { firstName, lastName }) => {
     let outlook = new ActiveXObject("Outlook.Application");
 
     let mailItem = outlook.createItemFromTemplate(templatesDirectory + "\\employee\\" + templateName)
 
     const keys = {
-        fullName,
+        firstName, lastName
     }
 
     let body = mailItem.HTMLBody;
@@ -176,9 +201,9 @@ const getEmployeeEmail = (templateName, { fullName }) => {
     return { body, subject: mailItem.Subject }
 }
 
-const getManagerEmail = (templateName, { supervisorName, employees }) => {
-    const formattedEmployees = employees.map((employee) => {
-        return `<li style="${styles.email}">${employee}</li>`
+const getManagerEmail = (templateName, { managerName, impactedEmployees }) => {
+    const formattedEmployees = impactedEmployees.map((employee) => {
+        return `${employee}`
     })
 
     let outlook = new ActiveXObject("Outlook.Application");
@@ -186,7 +211,7 @@ const getManagerEmail = (templateName, { supervisorName, employees }) => {
     let mailItem = outlook.createItemFromTemplate(templatesDirectory + "\\manager\\" + templateName)
 
     const keys = {
-        supervisorName, employees: formattedEmployees.join("")
+        managerName, impactedEmployees: `${formattedEmployees.join(', ')}`
     }
 
     let body = mailItem.HTMLBody;
@@ -194,6 +219,8 @@ const getManagerEmail = (templateName, { supervisorName, employees }) => {
     Object.keys(keys).forEach(key => {
         body = body.replaceAll(`{${key}}`, keys[key])
     })
+
+    console.log(body)
 
     return { body, subject: mailItem.Subject }
 }

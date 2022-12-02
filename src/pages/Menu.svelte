@@ -1,6 +1,6 @@
 <script>
   import { loadData, data, failLoadData, failLoadMessage, openFile, FILE_PATH, getFileName } from "../stores/data";
-  import { employeeEmails, generateEmails, generatingEmails, generationMessage, managerEmails, sendEmails, sendingEmails, sendingMessage } from "../stores/emails";
+  import { config, configError, employeeEmails, generateEmails, generatingEmails, generationMessage, loadMailConfig, managerEmails, sendEmails, sendingEmails, sendingMessage } from "../stores/emails";
   import { changePage, pageLoading } from "../stores/routes";
   import { loadTemplates, templatesError, templatesList } from "../stores/templates";
 
@@ -9,6 +9,7 @@
 
     setTimeout(() => {
       loadTemplates();
+      loadMailConfig();
       loadData().then(() => {
         $pageLoading = false;
       });
@@ -34,6 +35,10 @@
     <p><code>{$failLoadMessage}</code></p>
 
     <p>Please ensure <code>{FILE_PATH}</code> is present and restart.</p>
+  {:else if $configError}
+    <h2>Failed to load mail configuration</h2>
+
+    <p><code>{$configError}</code></p>
   {:else if $templatesError}
     <h2>Failed to load templates</h2>
 
@@ -42,11 +47,11 @@
     <p>Path: <code>{$templatesError.path}</code></p>
   {:else}
     <h2>Menu</h2>
-
+    
     {#if $data}
       <div class="content">
         <div>
-          <p>Data succesfully imported from <code>{FILE_PATH}</code>.</p>
+          <p>Sending from: <b>{$config.mailbox}</b></p>
         </div>
 
         <div class="mrgn-tp-lg">

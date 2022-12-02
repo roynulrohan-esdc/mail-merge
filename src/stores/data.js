@@ -121,13 +121,17 @@ export const readData = (workbook) => {
     let areaRows = currentArea.Rows.Count;
 
     for (let j = 2; j <= areaRows; j++) {
-      const fullName = currentArea.Cells(j, 1).value;
-      const email = currentArea.Cells(j, 2).value;
-      const supervisorName = currentArea.Cells(j, 3).value;
-      const supervisorEmail = currentArea.Cells(j, 4).value;
+      const lastName = currentArea.Cells(j, 1).value;
+      const firstName = currentArea.Cells(j, 2).value;
+      const email = currentArea.Cells(j, 3).value;
+      const costCentre = currentArea.Cells(j, 4).value;
+      const managers = currentArea.Cells(j, 5).value;
+      const managersClassification = currentArea.Cells(j, 6).value;
+      const managersEmails = currentArea.Cells(j, 7).value;
 
-      if (fullName && email && supervisorName && supervisorEmail) {
-        array.push({ fullName, email, supervisorName, supervisorEmail });
+      if (lastName && firstName && email && costCentre && managers && managersClassification && managersEmails) {
+
+        array.push({ lastName, firstName, email, costCentre, managers, managersClassification, managersEmails });
       }
     }
   }

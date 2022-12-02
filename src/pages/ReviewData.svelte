@@ -28,30 +28,42 @@
       </select>
     </div> -->
     {#if $data}
-      <div class="mrgn-tp-lg">
+      <div class="mrgn-tp-lg table-responsive">
         <table class="table results-table table-bordered">
           <thead>
             <tr>
-              <th scope="col">Full Name</th>
+              <th scope="col">Last Name</th>
+              <th scope="col">First Name</th>
               <th scope="col">Email</th>
-              <th scope="col">Supervisor's Name</th>
-              <th scope="col">Manager Email</th>
+              <th scope="col">Cost Centre</th>
+              <th scope="col">Managers</th>
+              <th scope="col">Classification</th>
+              <th scope="col">Manager Email Address</th>
             </tr>
           </thead>
           <tbody>
             {#each $data as row}
               <tr>
                 <td>
-                  {row.fullName}
+                  {row.lastName}
+                </td>
+                <td>
+                  {row.firstName}
                 </td>
                 <td>
                   {row.email}
                 </td>
                 <td>
-                  {row.supervisorName}
+                  {row.costCentre}
                 </td>
                 <td>
-                  {row.supervisorEmail}
+                  {row.managers}
+                </td>
+                <td>
+                  {row.managersClassification}
+                </td>
+                <td>
+                  {row.managersEmails}
                 </td>
               </tr>
             {/each}
@@ -104,7 +116,7 @@
 
   .results-table {
     width: 100%;
-    font-size: 14px;
+    font-size: 13px;
   }
 
   .results-table * {
