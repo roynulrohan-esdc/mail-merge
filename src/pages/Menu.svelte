@@ -47,7 +47,7 @@
     <p>Path: <code>{$templatesError.path}</code></p>
   {:else}
     <h2>Menu</h2>
-    
+
     {#if $data}
       <div class="content">
         <div>
@@ -110,15 +110,18 @@
           <div class="mrgn-tp-md">
             <label for="templatesDropdown">Choose a template for script</label>
             <select id="templatesDropdown" class="form-control" bind:value={chosenTemplate} disabled={generationType === ""}>
-              <option label="Select a template" />
               {#if generationType === "Employee"}
+                <option label={$templatesList.employees.length === 0 ? "No employee templates found" : "Select a template"} />
                 {#each $templatesList.employees as template}
                   <option value={template}>{template}</option>
                 {/each}
               {:else if generationType === "Manager"}
+                <option label={$templatesList.managers.length === 0 ? "No manager templates found" : "Select a template"} />
                 {#each $templatesList.managers as template}
                   <option value={template}>{template}</option>
                 {/each}
+              {:else}
+                <option label="Select a template" />
               {/if}
             </select>
           </div>

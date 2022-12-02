@@ -39,14 +39,6 @@ export const loadTemplates = async () => {
         const employees = readFileNames(new Enumerator(employeeFolder.files));
         const managers = readFileNames(new Enumerator(managerFolder.files));
 
-        if (employees.length === 0) {
-            throw 4
-        }
-
-        if (managers.length === 0) {
-            throw 5
-        }
-
         templatesList.set({ employees, managers })
     } catch (e) {
         console.log(e)
