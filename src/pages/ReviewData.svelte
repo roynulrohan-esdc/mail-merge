@@ -36,7 +36,7 @@
               <th scope="col">First Name</th>
               <th scope="col">Email</th>
               <th scope="col">Cost Centre</th>
-              <th scope="col">Managers</th>
+              <th scope="col">Manager</th>
               <th scope="col">Classification</th>
               <th scope="col">Manager Email Address</th>
             </tr>
@@ -57,13 +57,13 @@
                   {row.costCentre}
                 </td>
                 <td>
-                  {row.managers}
+                  {row.manager}
                 </td>
                 <td>
-                  {row.managersClassification}
+                  {row.managerClassification}
                 </td>
                 <td>
-                  {row.managersEmails}
+                  {row.managerEmail}
                 </td>
               </tr>
             {/each}
@@ -114,9 +114,14 @@
     width: fit-content;
   }
 
+  .table-responsive {
+    height: 70vh;
+    overflow: auto;
+  }
+
   .results-table {
     width: 100%;
-    font-size: 13px;
+    font-size: 13px; 
   }
 
   .results-table * {

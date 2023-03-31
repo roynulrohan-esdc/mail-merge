@@ -10,9 +10,12 @@
     setTimeout(() => {
       loadTemplates();
       loadMailConfig();
-      loadData().then(() => {
-        $pageLoading = false;
-      });
+
+      if ($config.sheet) {
+        loadData().then(() => {
+          $pageLoading = false;
+        });
+      }
     }, 200);
   };
   if (!$data) {
@@ -34,7 +37,7 @@
 
     <p><code>{$failLoadMessage}</code></p>
 
-    <p>Please ensure <code>{FILE_PATH}</code> is present and restart.</p>
+    <p>Please ensure <code>{FILE_PATH}</code> is present and the sheet name is defined in <code>/input/mailConfig.json</code></p>
   {:else if $configError}
     <h2>Failed to load mail configuration</h2>
 

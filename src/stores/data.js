@@ -1,13 +1,12 @@
 import { get, readable, writable } from "svelte/store";
 import { path } from "./settings";
 import { pageLoading } from './routes'
+import { config } from "./emails";
 
 
 export const data = writable();
 export const failLoadData = writable(false);
 export const failLoadMessage = writable('');
-
-const DEFAULT_SHEET = "Sheet1";
 
 export const FILE_PATH = "\\input\\Data.xlsx"
 
@@ -98,7 +97,7 @@ const readFile = (filePath) => {
 
     } catch (e) {
       console.error(e);
-      throw `Error opening ${filePath}`
+      throw `Error opening excel`
     }
     excel.quit();
   } else {
@@ -109,7 +108,13 @@ const readFile = (filePath) => {
 };
 
 export const readData = (workbook) => {
-  const sheet = workbook.Worksheets(DEFAULT_SHEET);
+  let sheet;
+
+  try {
+    sheet = workbook.Worksheets(get(config).sheet);
+  } catch (e) {
+    throw "Error reading excel. Invalid sheet name"
+  }
 
   let remainingResults = sheet.UsedRange.SpecialCells(12);
   let areasResults = remainingResults.Areas;
@@ -125,13 +130,13 @@ export const readData = (workbook) => {
       const firstName = currentArea.Cells(j, 2).value;
       const email = currentArea.Cells(j, 3).value;
       const costCentre = currentArea.Cells(j, 4).value;
-      const managers = currentArea.Cells(j, 5).value;
-      const managersClassification = currentArea.Cells(j, 6).value;
-      const managersEmails = currentArea.Cells(j, 7).value;
+      const manager = currentArea.Cells(j, 5).value;
+      const managerClassification = currentArea.Cells(j, 6).value;
+      const managerEmail = currentArea.Cells(j, 7).value;
 
-      if (lastName && firstName && email && costCentre && managers && managersClassification && managersEmails) {
+      if (lastName && firstName && email && costCentre && manager && managerClassification && managerEmail) {
 
-        array.push({ lastName, firstName, email, costCentre, managers, managersClassification, managersEmails });
+        array.push({ lastName, firstName, email, costCentre, manager, managerClassification, managerEmail });
       }
     }
   }

@@ -2,7 +2,6 @@ import { get, writable } from "svelte/store"
 import { path } from "./settings";
 import { data } from './data'
 import { templatesDirectory } from './templates'
-import configJson from '../../public/input/mailConfig.json';
 
 export const employeeEmails = writable([])
 export const managerEmails = writable([])
@@ -14,17 +13,30 @@ export const generatingEmails = writable(false);
 export const generationMessage = writable("");
 
 export const configError = writable();
-export const config = writable({ mailbox: null })
+export const config = writable({ mailbox: null, sheet: null })
 
 const outputPath = path + '/output/';
 
-export const loadMailConfig = () => {
-    if (!configJson.mailbox) {
-        configError.set('Attribute "mailbox" not found in \\input\\mailConfig.json')
-    }
 
-    config.set({ mailbox: configJson.mailbox })
+export const loadMailConfig = () => {
+    let fso = new ActiveXObject("Scripting.FileSystemObject");
+
+    try {
+        let file = fso.OpenTextFile(path + "/input/mailConfig.json")
+        let json = JSON.parse(file.ReadAll())
+
+        config.set({ ...json })
+
+        if (!json.sheet && !json.mailbox) {
+            configError.set("Error loading mail configuration")
+        }
+    }
+    catch (e) {
+        configError.set(e)
+        console.error(e)
+    }
 }
+
 
 export const sendEmails = (mode = 0) => {
     sendingEmails.set(true);
@@ -122,23 +134,18 @@ export const generateEmails = (mode = 0, templateName) => {
             const managerToEmail = {};
 
             employees.forEach((employee) => {
-                const managers = employee.managers.split(',');
-                const managersEmails = employee.managersEmails.split(',')
+                const manager = employee.manager.trim();
+                const managerEmail = employee.managerEmail.trim();
 
-                managers.forEach((manager, i) => {
-                    manager = manager.trim();
+                if (!managerToEmployees[manager]) {
+                    managerToEmployees[manager] = [];
+                }
 
-                    if (!managerToEmployees[manager]) {
-                        managerToEmployees[manager] = [];
-                    }
+                managerToEmployees[manager].push(`${employee.firstName} ${employee.lastName}`);
 
-                    managerToEmployees[manager].push(`${employee.firstName} ${employee.lastName}`);
-
-                    if (!managerToEmail[manager]) {
-                        managerToEmail[manager] = managersEmails[i].trim();
-                    }
-                })
-
+                if (!managerToEmail[manager]) {
+                    managerToEmail[manager] = managerEmail.trim();
+                }
 
             })
 
@@ -153,16 +160,16 @@ export const generateEmails = (mode = 0, templateName) => {
                     let objEmail = objOutlook.CreateItem(0) //0 is email
 
                     objEmail.To = managerToEmail[manager[0]];
-                    
+
                     objEmail.SentOnBehalfOfName = get(config).mailbox
 
-                    const email = getManagerEmail(templateName, { managerName: manager[0], impactedEmployees: manager[1] });
+                    const email = getManagerEmail(templateName, { impactedEmployees: manager[1] });
 
                     objEmail.Subject = email.subject
 
                     objEmail.HTMLBody = email.body
 
-                    objEmail.SaveAs(`${outputPath}/managers/${manager[0].split(" ")[1]}, ${manager[0].split(" ")[0]}.msg`)
+                    objEmail.SaveAs(`${outputPath}/managers/${manager[0]}.msg`)
 
                     emails.push(objEmail)
                 }
@@ -201,7 +208,7 @@ const getEmployeeEmail = (templateName, { firstName, lastName }) => {
     return { body, subject: mailItem.Subject }
 }
 
-const getManagerEmail = (templateName, { managerName, impactedEmployees }) => {
+const getManagerEmail = (templateName, { firstName, lastName, impactedEmployees }) => {
     const formattedEmployees = impactedEmployees.map((employee) => {
         return `${employee}`
     })
@@ -211,7 +218,7 @@ const getManagerEmail = (templateName, { managerName, impactedEmployees }) => {
     let mailItem = outlook.createItemFromTemplate(templatesDirectory + "\\manager\\" + templateName)
 
     const keys = {
-        managerName, impactedEmployees: `${formattedEmployees.join(', ')}`
+        firstName, lastName, impactedEmployees: `${formattedEmployees.join(', ')}`
     }
 
     let body = mailItem.HTMLBody;
@@ -219,8 +226,6 @@ const getManagerEmail = (templateName, { managerName, impactedEmployees }) => {
     Object.keys(keys).forEach(key => {
         body = body.replaceAll(`{${key}}`, keys[key])
     })
-
-    console.log(body)
 
     return { body, subject: mailItem.Subject }
 }
