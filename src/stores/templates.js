@@ -29,17 +29,11 @@ export const loadTemplates = async () => {
             throw 2
         }
 
-        if (!fso.FolderExists(templatesDirectory + '\\manager')) {
-            throw 3
-        }
-
         let employeeFolder = fso.GetFolder(templatesDirectory + '\\employee');
-        let managerFolder = fso.GetFolder(templatesDirectory + '\\manager');
 
         const employees = readFileNames(new Enumerator(employeeFolder.files));
-        const managers = readFileNames(new Enumerator(managerFolder.files));
 
-        templatesList.set({ employees, managers })
+        templatesList.set({ employees, manager:[] })
     } catch (e) {
         console.log(e)
         templatesError.set(errors[e] || e)

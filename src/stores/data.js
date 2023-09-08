@@ -129,14 +129,11 @@ export const readData = (workbook) => {
       const lastName = currentArea.Cells(j, 1).value;
       const firstName = currentArea.Cells(j, 2).value;
       const email = currentArea.Cells(j, 3).value;
-      const costCentre = currentArea.Cells(j, 4).value;
-      const manager = currentArea.Cells(j, 5).value;
-      const managerClassification = currentArea.Cells(j, 6).value;
-      const managerEmail = currentArea.Cells(j, 7).value;
+      const classification = currentArea.Cells(j, 6).value;
 
-      if (lastName && firstName && email && costCentre && manager && managerClassification && managerEmail) {
+      if (lastName && firstName && email && classification) {
 
-        array.push({ lastName, firstName, email, costCentre, manager, managerClassification, managerEmail });
+        array.push({ lastName, firstName, email, classification });
       }
     }
   }

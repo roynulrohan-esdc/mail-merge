@@ -22,7 +22,9 @@
     getData();
   }
 
-  let chosenTemplate, generationType, sendType;
+  let chosenTemplate,
+    generationType = "Employee",
+    sendType;
 
   $: {
     if (generationType) {
@@ -103,9 +105,9 @@
 
           <div class="mrgn-tp-lg">
             <label for="typeDropdown">Employee or Manager</label>
-            <select id="typeDropdown" class="form-control" bind:value={generationType}>
+            <select id="typeDropdown" class="form-control" bind:value={generationType} disabled>
               <option label="Select a target" />
-              <option value={"Employee"}>Employee</option>
+              <option value={"Employee"} selected>Employee</option>
               <option value={"Manager"}>Manager</option>
             </select>
           </div>
@@ -159,16 +161,16 @@
           </div>
         </div>
 
-        {#if $managerEmails.length !== 0 || $employeeEmails.length !== 0}
+        {#if $employeeEmails.length !== 0}
           <div class="mrgn-tp-lg">
             <h4>Send Emails</h4>
 
             <div class="mrgn-tp-lg">
               <label for="typeDropdown">Employee or Manager</label>
-              <select id="typeDropdown" class="form-control" bind:value={sendType}>
+              <select id="typeDropdown" class="form-control" bind:value={sendType} disabled>
                 <option label="Select a target" />
                 {#if $employeeEmails.length !== 0}
-                  <option value={"Employee"}>Employee</option>
+                  <option value={"Employee"} selected>Employee</option>
                 {/if}
                 {#if $managerEmails.length !== 0}
                   <option value={"Manager"}>Manager</option>

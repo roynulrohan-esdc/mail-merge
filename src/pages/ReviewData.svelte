@@ -35,10 +35,7 @@
               <th scope="col">Last Name</th>
               <th scope="col">First Name</th>
               <th scope="col">Email</th>
-              <th scope="col">Cost Centre</th>
-              <th scope="col">Manager</th>
               <th scope="col">Classification</th>
-              <th scope="col">Manager Email Address</th>
             </tr>
           </thead>
           <tbody>
@@ -54,16 +51,7 @@
                   {row.email}
                 </td>
                 <td>
-                  {row.costCentre}
-                </td>
-                <td>
-                  {row.manager}
-                </td>
-                <td>
-                  {row.managerClassification}
-                </td>
-                <td>
-                  {row.managerEmail}
+                  {row.classification}
                 </td>
               </tr>
             {/each}
