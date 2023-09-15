@@ -1,5 +1,5 @@
 <script>
-  import { loadData, data, failLoadData, failLoadMessage, openFile, FILE_PATH, getFileName } from "../stores/data";
+  import { loadData, data, openFile, dataError, dataFilesList, readData, readDataFile, importData } from "../stores/data";
   import { config, configError, employeeEmails, generateEmails, generatingEmails, generationMessage, loadMailConfig, managerEmails, sendEmails, sendingEmails, sendingMessage } from "../stores/emails";
   import { changePage, pageLoading } from "../stores/routes";
   import { loadTemplates, templatesError, templatesList } from "../stores/templates";
@@ -23,6 +23,7 @@
   }
 
   let chosenTemplate,
+    chosenDataFile,
     generationType = "Employee",
     sendType;
 
@@ -34,12 +35,12 @@
 </script>
 
 <div>
-  {#if $failLoadData}
-    <h2>Failed to load data from excel</h2>
+  {#if $dataError}
+    <h2>Failed to load excel data</h2>
 
-    <p><code>{$failLoadMessage}</code></p>
+    <p>{$dataError.message}</p>
 
-    <p>Please ensure <code>{FILE_PATH}</code> is present and the sheet name is defined in <code>/input/mailConfig.json</code></p>
+    <p>Path: <code>{$dataError.path}</code></p>
   {:else if $configError}
     <h2>Failed to load mail configuration</h2>
 
@@ -53,12 +54,43 @@
   {:else}
     <h2>Menu</h2>
 
-    {#if $data}
-      <div class="content">
-        <div>
-          <p>Sending from: <b>{$config.mailbox}</b></p>
+    <div class="content">
+      <div>
+        <p>Sending from: <b>{$config.mailbox}</b></p>
+      </div>
+
+      <div class="mrgn-tp-lg">
+        <h4>Import Data</h4>
+
+        <div class="mrgn-tp-md">
+          <label for="dataListDropdown">Choose an excel file to import from</label>
+          <select id="dataListDropdown" class="form-control" bind:value={chosenDataFile} disabled={generationType === ""}>
+            <option label={$dataFilesList.length === 0 ? "No data files found" : "Select a data file"} />
+            {#each $dataFilesList as dataFile}
+              <option value={dataFile}>{dataFile}</option>
+            {/each}
+          </select>
         </div>
 
+        {#if chosenDataFile}
+          <div class="flex mrgn-tp-lg">
+            <button
+              class="btn btn-primary"
+              on:click={() => {
+                employeeEmails.set([]);
+                generationMessage.set("");
+                sendingMessage.set("");
+                importData(chosenDataFile);
+              }}
+              disabled={$generatingEmails}
+            >
+              Import Data
+            </button>
+          </div>
+        {/if}
+      </div>
+
+      {#if $data}
         <div class="mrgn-tp-lg">
           <h4>Change Data</h4>
 
@@ -79,7 +111,7 @@
                 }}
                 disabled={$generatingEmails}
                 class="btn btn-default"
-                ><span class="fa fa-edit" /><span class="mrgn-lft-sm">Edit {getFileName()}</span>
+                ><span class="fa fa-edit" /><span class="mrgn-lft-sm">Edit</span>
               </button>
             </div>
           </div>
@@ -208,8 +240,8 @@
             </div>
           </div>
         {/if}
-      </div>
-    {/if}
+      {/if}
+    </div>
   {/if}
 </div>
 

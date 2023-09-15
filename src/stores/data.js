@@ -3,28 +3,54 @@ import { path } from "./settings";
 import { pageLoading } from './routes'
 import { config } from "./emails";
 
-
+export const dataFilesList = writable([]);
+export const dataError = writable()
 export const data = writable();
-export const failLoadData = writable(false);
-export const failLoadMessage = writable('');
 
-export const FILE_PATH = "\\input\\Data.xlsx"
+const subDirectory = '\\input\\data';
 
-export const getFileName = () => {
-  const split = FILE_PATH.split('\\');
+export const dataDirectory = path + subDirectory;
 
-  return split[split.length - 1]
+const errors = {
+  1: { message: "Input directory does not exist.", path: dataDirectory },
+  2: { message: "No data files found", path: dataDirectory }
 }
 
 export const loadData = async () => {
   try {
-    data.set(readFile(path + FILE_PATH))
+    let fso = new ActiveXObject("Scripting.FileSystemObject");
+
+    if (!fso.FolderExists(dataDirectory)) {
+      throw 1
+    }
+
+    let dataFolder = fso.GetFolder(dataDirectory);
+
+    const dataFiles = readFileNames(new Enumerator(dataFolder.files));
+
+    if (dataFiles.length === 0) {
+      throw 2
+    }
+
+    dataFilesList.set(dataFiles)
   } catch (e) {
     console.log(e)
-    failLoadMessage.set(e)
-    failLoadData.set(true)
+    dataError.set(errors[e] || e)
   }
 };
+
+const readFileNames = (enumerator) => {
+  const list = [];
+
+  for (; !enumerator.atEnd(); enumerator.moveNext()) {
+    console.log(enumerator.item().Type)
+    if (enumerator.item().Type === 'Microsoft Excel Worksheet') {
+      list.push(enumerator.item().Name);
+    }
+  }
+
+  return list;
+}
 
 export const openFile = () => {
   try {
@@ -72,7 +98,22 @@ const readFileWithVisibility = (filePath) => {
   }
 }
 
-const readFile = (filePath) => {
+export const importData = async (filePath) => {
+  filePath = dataDirectory + "\\" + filePath;
+  pageLoading.set(true);
+
+  setTimeout(async () => {
+    try {
+      data.set(await readDataFile(filePath))
+    } catch (e) {
+      console.log(e)
+    }
+
+    pageLoading.set(false)
+  }, 1000);
+}
+
+export const readDataFile = async (filePath) => {
   let fso = new ActiveXObject("Scripting.FileSystemObject");
   let array;
 
