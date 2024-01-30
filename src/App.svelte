@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import Loading from "./components/Loading.svelte";
   import { page, pageLoading } from "./stores/routes";
 

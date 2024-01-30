@@ -2,9 +2,12 @@ import svelte from 'rollup-plugin-svelte';
 import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve';
 import livereload from 'rollup-plugin-livereload';
-import { terser } from 'rollup-plugin-terser';
+import {terser} from '@rollup/plugin-terser';
 import css from 'rollup-plugin-css-only';
 import { babel } from '@rollup/plugin-babel'
+import typescript from '@rollup/plugin-typescript';
+import sveltePreprocess from 'svelte-preprocess';
+import replace from "@rollup/plugin-replace";
 import json from '@rollup/plugin-json';
 
 const production = !process.env.ROLLUP_WATCH;
@@ -12,9 +15,14 @@ const production = !process.env.ROLLUP_WATCH;
 const legacySupport = true
 
 const babelConfig = {
-    extensions: ['.js', '.mjs', '.html', '.svelte'],
+    extensions: ['.js', '.mjs', '.html', '.svelte', ".ts"],
     babelHelpers: "runtime",
     exclude: ['node_modules/@babel/**', 'node_modules/core-js/**'],
+    env: {
+        development: {
+            compact: false,
+        }
+    },
     presets: [
         [
             '@babel/preset-env',
@@ -38,7 +46,6 @@ const babelConfig = {
     ],
 }
 
-
 function serve() {
     let server;
 
@@ -61,30 +68,41 @@ function serve() {
 }
 
 export default {
-    input: 'src/main.js',
+    input: 'src/main.ts',
     output: {
         sourcemap: true,
         format: 'iife',
         name: 'app',
-        file: 'public/build/bundle.js'
+        file: 'public/build/bundle.js',
+        inlineDynamicImports: true
     },
+    external: ['moment/locale/en'],
     plugins: [
+        replace({
+            isProduction: production,
+            preventAssignment: false,
+        }),
+
         svelte({
+            preprocess: sveltePreprocess(),
             compilerOptions: {
                 // enable run-time checks when not in production
                 dev: !production
             }
         }),
+
+        typescript({ sourceMap: !production }),
+
         // we'll extract any component CSS out into
         // a separate file - better for performance
         css({ output: 'bundle.css' }),
 
+        commonjs(),
         // If you have external dependencies installed from
         // npm, you'll most likely need these plugins. In
         // some cases you'll need additional configuration -
         // consult the documentation for details:
         // https://github.com/rollup/plugins/tree/master/packages/commonjs
-        commonjs(),
         resolve({
             browser: true,
             dedupe: ['svelte']
@@ -106,7 +124,7 @@ export default {
 
         // If we're building for production (npm run build
         // instead of npm run dev), minify
-        production && terser()
+        production && terser(),
     ],
     watch: {
         clearScreen: false

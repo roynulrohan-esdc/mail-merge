@@ -1,6 +1,7 @@
-<script>
-  import { loadData, data, openFile, dataError, dataFilesList, readData, readDataFile, importData } from "../stores/data";
-  import { config, configError, employeeEmails, generateEmails, generatingEmails, generationMessage, loadMailConfig, managerEmails, sendEmails, sendingEmails, sendingMessage } from "../stores/emails";
+<script lang="ts">
+  import Checkbox from "../components/Checkbox.svelte";
+  import { data, dataError, dataFilesList, importData, loadData } from "../stores/data";
+  import { config, configError, emailsSent, employeeEmails, generateEmails, generatingEmails, generationMessage, loadMailConfig, sendEmails, sendingEmails, sendingMessage } from "../stores/emails";
   import { changePage, pageLoading } from "../stores/routes";
   import { loadTemplates, templatesError, templatesList } from "../stores/templates";
 
@@ -18,14 +19,14 @@
       }
     }, 200);
   };
-  if (!$data) {
-    getData();
-  }
+
+  getData();
 
   let chosenTemplate,
     chosenDataFile,
     generationType = "Employee",
-    sendType;
+    sendType = "Employee",
+    sendEmailsCheckbox = false;
 
   $: {
     if (generationType) {
@@ -78,24 +79,16 @@
               class="btn btn-primary"
               on:click={() => {
                 employeeEmails.set([]);
-                generationMessage.set("");
-                sendingMessage.set("");
+                generationMessage.set(null);
+                sendingMessage.set(null);
                 importData(chosenDataFile);
               }}
               disabled={$generatingEmails}
             >
               Import Data
             </button>
-          </div>
-        {/if}
-      </div>
 
-      {#if $data}
-        <div class="mrgn-tp-lg">
-          <h4>Change Data</h4>
-
-          <div class="mrgn-tp-md">
-            <div class="flex mrgn-tp-md">
+            {#if $data.employees.length !== 0}
               <button
                 class="btn btn-default"
                 on:click={() => {
@@ -105,44 +98,23 @@
               >
                 View Imported Data
               </button>
-              <button
-                on:click={() => {
-                  openFile();
-                }}
-                disabled={$generatingEmails}
-                class="btn btn-default"
-                ><span class="fa fa-edit" /><span class="mrgn-lft-sm">Edit</span>
-              </button>
-            </div>
+            {/if}
           </div>
+        {/if}
+      </div>
 
-          <div class="mrgn-tp-md">
-            <p>If data has been changed, sync to update data</p>
-            <div class="flex mrgn-tp-md">
-              <button
-                class="btn btn-default"
-                on:click={() => {
-                  getData();
-                }}
-                disabled={$generatingEmails}
-              >
-                <span class="fa fa-save" /><span class="mrgn-lft-sm">Sync Data</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
+      {#if $data.employees.length !== 0}
         <div class="mrgn-tp-lg">
           <h4>Email Generation</h4>
 
-          <div class="mrgn-tp-lg">
+          <!-- <div class="mrgn-tp-lg">
             <label for="typeDropdown">Employee or Manager</label>
             <select id="typeDropdown" class="form-control" bind:value={generationType} disabled>
               <option label="Select a target" />
               <option value={"Employee"} selected>Employee</option>
               <option value={"Manager"}>Manager</option>
             </select>
-          </div>
+          </div> -->
 
           <div class="mrgn-tp-md">
             <label for="templatesDropdown">Choose a template for script</label>
@@ -168,6 +140,7 @@
               <button
                 class="btn btn-primary"
                 on:click={() => {
+                  emailsSent.set(false);
                   generateEmails(generationType === "Employee" ? 0 : 1, chosenTemplate);
                 }}
                 disabled={$generatingEmails}
@@ -197,7 +170,7 @@
           <div class="mrgn-tp-lg">
             <h4>Send Emails</h4>
 
-            <div class="mrgn-tp-lg">
+            <!-- <div class="mrgn-tp-lg">
               <label for="typeDropdown">Employee or Manager</label>
               <select id="typeDropdown" class="form-control" bind:value={sendType} disabled>
                 <option label="Select a target" />
@@ -208,16 +181,18 @@
                   <option value={"Manager"}>Manager</option>
                 {/if}
               </select>
-            </div>
+            </div> -->
 
             {#if sendType}
+              <Checkbox bind:checked={sendEmailsCheckbox} label={"I have reviewed the emails and I'm ready to send them"} />
+
               <div class="flex mrgn-tp-lg">
                 <button
                   class="btn btn-primary"
                   on:click={() => {
                     sendEmails(sendType === "Employee" ? 0 : 1);
                   }}
-                  disabled={$generatingEmails}
+                  disabled={$sendingEmails || !sendEmailsCheckbox || $emailsSent}
                 >
                   Send Emails
                 </button>

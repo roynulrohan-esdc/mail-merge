@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { data } from "../stores/data";
   import { changePage } from "../stores/routes";
 
@@ -32,26 +32,26 @@
         <table class="table results-table table-bordered">
           <thead>
             <tr>
-              <th scope="col">Last Name</th>
               <th scope="col">First Name</th>
+              <th scope="col">Last Name</th>
               <th scope="col">Email</th>
-              <th scope="col">Classification</th>
+              <th scope="col">PRI</th>
             </tr>
           </thead>
           <tbody>
-            {#each $data as row}
+            {#each $data.employees as row}
               <tr>
                 <td>
-                  {row.lastName}
+                  {row.firstName}
                 </td>
                 <td>
-                  {row.firstName}
+                  {row.lastName}
                 </td>
                 <td>
                   {row.email}
                 </td>
                 <td>
-                  {row.classification}
+                  {row.pri}
                 </td>
               </tr>
             {/each}
@@ -109,7 +109,7 @@
 
   .results-table {
     width: 100%;
-    font-size: 13px; 
+    font-size: 13px;
   }
 
   .results-table * {
