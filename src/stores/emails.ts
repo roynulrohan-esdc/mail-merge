@@ -99,6 +99,9 @@ export const generateEmails = (mode = 0, templateName) => {
 
       const emails = [];
 
+
+      const letterName = 'Bienvenue - Welcome';
+
       for (let index = 0; index < employees.length; index++) {
         const employee = employees[index];
 
@@ -106,7 +109,7 @@ export const generateEmails = (mode = 0, templateName) => {
 
         FileSystem.createFolder(employeeDirectory);
 
-        const template = createTemplate(path + "\\input\\attachments\\CDS Welcome Letter Template BIL.docx", employee);
+        const template = createTemplate(path + `\\input\\attachments\\${letterName}.docx`, employee);
 
         if (template === TemplateError.INVALID_TEMPLATE) {
           generationMessage.set({ message: "An unknown error occured while generating emails", path: "" });
@@ -121,7 +124,7 @@ export const generateEmails = (mode = 0, templateName) => {
           return;
         }
 
-        await FileSystem.saveFile(template, employeeDirectory + "CDS Welcome Letter Template BIL.docx", true);
+        await FileSystem.saveFile(template, employeeDirectory + `${letterName}.docx`, true);
 
         try {
           let objOutlook = new ActiveXObject("Outlook.Application");
@@ -136,7 +139,7 @@ export const generateEmails = (mode = 0, templateName) => {
 
           objEmail.SentOnBehalfOfName = get(config).mailbox;
 
-          objEmail.Attachments.Add(employeeDirectory + "CDS Welcome Letter Template BIL.docx");
+          objEmail.Attachments.Add(employeeDirectory + `${letterName}.docx`);
 
           objEmail.SaveAs(employeeDirectory + `${employee.lastName}, ${employee.firstName}.msg`);
 

@@ -9,7 +9,7 @@
 <main>
   <div class="container">
     <div class="mrgn-tp-lg">
-      <h1 id="title">Mail Merge</h1>
+      <h1 id="title">Mail Merge - Modified for Staffing Team</h1>
     </div>
 
     <svelte:component this={$page} />

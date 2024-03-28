@@ -121,13 +121,14 @@ export const readData = (workbook) => {
     let areaRows = currentArea.Rows.Count;
 
     for (let j = 2; j <= areaRows; j++) {
-      const firstName = currentArea.Cells(j, 1).value;
-      const lastName = currentArea.Cells(j, 2).value;
-      const email = currentArea.Cells(j, 3).value;
-      const pri = currentArea.Cells(j, 4).value;
+      const firstName: string = currentArea.Cells(j, 1).value;
+      const lastName: string = currentArea.Cells(j, 2).value;
+      const email: string = currentArea.Cells(j, 3).value;
+      const pri: string = currentArea.Cells(j, 4).value;
 
       if (firstName && lastName && email && pri) {
-        array.push({ lastName, firstName, email, pri });
+        console.log(`${j} - ${firstName.trim()} ${lastName.trim()}`);
+        array.push({ lastName:lastName.trim(), firstName:firstName.trim(), email, pri });
       }
     }
   }
